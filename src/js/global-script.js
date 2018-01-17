@@ -56,9 +56,6 @@ $( document ).ready(function() {
   // инициализируем главную карусель
   pageSwiper.init();
 
-  // заменим метаданные (пока только title, ТОЛЬКО после включения галереи)
-  metaDataChange();
-
   // по окончанию смены слайда главной карусели...
   pageSwiper.on('slideChangeTransitionEnd', function () { //console.log(this);
 
@@ -70,7 +67,7 @@ $( document ).ready(function() {
 
   });
 
-  // при смене слайда главной карусели...
+  // в момент смены слайда главной карусели...
   pageSwiper.on('slideChange', function () { // console.log(this);
 
     // сменим фоновый цвет страницы
@@ -79,6 +76,55 @@ $( document ).ready(function() {
     pageBgColorChange(pageNewBgColor);
 
   });
+
+  // ВРЕМЕННО
+  $('.page__slide-part').each(function(){
+    $(this).find('h1').prepend('scroll: ' + Math.round($(this).position().top) + ' ');
+  });
+
+  // по скроллу в каждом конкретном слайде...
+  var t0;
+  $('.baron__scroller').each(function(){
+    var thisBlock = $(this);
+    thisBlock.on('scroll', function(){
+      clearTimeout(t0);
+      t0 = setTimeout(function () {
+          var innerBlocks = $(thisBlock).find('.page__slide-part');
+          var viewportTop = 0;
+          var viewportBottom = $('body').outerHeight();
+          // обойдем все вложенные части слайда
+          for (var i = 0; i < innerBlocks.length; i++) {
+            var innerBlockTop = $(innerBlocks[i]).offset().top;
+            var innerBlockBottom = $(innerBlocks[i]).offset().top + $(innerBlocks[i]).outerHeight();
+            // эта часть слайда не видна во вьюпорте
+            if(innerBlockBottom <= viewportTop || innerBlockTop >= viewportBottom){}
+            // эта часть слайда видна во вьюпорте
+            else {
+              var targetBlockIndex = 0;
+              // если низ первой видимой части выше середины вьюпорта
+              if(innerBlockBottom <= $('body').outerHeight() / 2) {
+                targetBlockIndex = i + 1;
+                // console.log('тянуть к блоку '+targetBlockIndex+' вниз');
+                var scrollTraget = Math.round($(innerBlocks[targetBlockIndex]).offset().top + $(thisBlock).scrollTop());
+                $(thisBlock).animate({scrollTop:scrollTraget}, 300);
+              }
+              // если низ первой видимой части ниже середины вьюпорта
+              else {
+                targetBlockIndex = i;
+                if($(innerBlocks[targetBlockIndex]).is('class'));
+                console.log('тянуть к блоку '+targetBlockIndex+' вверх');
+                var scrollTraget = Math.round($(innerBlocks[targetBlockIndex]).offset().top + $(thisBlock).scrollTop());
+                $(thisBlock).animate({scrollTop:scrollTraget}, 300);
+              }
+              // выходим из цикла, нужен анализ лишь первой видимой части слайда
+              break;
+            }
+          }
+        }, 50);
+    });
+  });
+
+
 
   /**
    * Меняет метаданные страницы (загрузка, смена слайда...)
