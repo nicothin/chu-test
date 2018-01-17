@@ -112,7 +112,7 @@ $( document ).ready(function() {
               else {
                 targetBlockIndex = i;
                 if($(innerBlocks[targetBlockIndex]).is('class'));
-                console.log('тянуть к блоку '+targetBlockIndex+' вверх');
+                // console.log('тянуть к блоку '+targetBlockIndex+' вверх');
                 var scrollTraget = Math.round($(innerBlocks[targetBlockIndex]).offset().top + $(thisBlock).scrollTop());
                 $(thisBlock).animate({scrollTop:scrollTraget}, 300);
               }
