@@ -1,24 +1,28 @@
 $( document ).ready(function() {
 
-  // свойства кастомного скролла: общие для всех сладов
-  var baronStaticSettings = {
-    scroller: '.baron__scroller',
-    bar: '.baron__bar',
-    scrollingCls: 'baron--scrolling',
-    draggingCls: 'baron--dragging',
-    barOnCls: 'baron--scrollbar',
-  };
+  document.addEventListener('touchmove', function (e) { e.preventDefault(); }, isPassive() ? {
+    capture: false,
+    passive: false
+  } : false);
+
+  var iScroll = {};
 
   // обойдем слайды и...
-  $('.baron.swiper-slide[id]').each(function() {
+  $('.swiper-slide[id]').each(function() {
+
+    // определим ID
+    var id = $(this).attr('id');
+
+    iScroll[id] = new IScroll('#'+id, {
+      scrollbars: true,
+      mouseWheel: true,
+      interactiveScrollbars: true,
+      shrinkScrollbars: 'scale',
+      snap: '.page__slide-part'
+    });
 
     // добавим data-hash атрибуты (для слайдера) на основе id слайда
-    $(this).attr('data-hash', $(this).attr('id'));
-
-    // включим кастомный скролл
-    var baronThisSettings = {root: '#' + $(this).attr('id')}
-    $.extend(baronThisSettings, baronStaticSettings);
-    baron(baronThisSettings);
+    $(this).attr('data-hash', id);
 
     // добавим фоновые цвета на слайды
     var slideBgColor = $(this).data('bg-color');
@@ -60,7 +64,7 @@ $( document ).ready(function() {
   pageSwiper.on('slideChangeTransitionEnd', function () { //console.log(this);
 
     // промотаем во всех прочих слайдах скролл вверх
-    $('.baron.swiper-slide[id]:not(:eq('+this.activeIndex+')) .baron__scroller').scrollTop(0);
+    // $('.baron.swiper-slide[id]:not(:eq('+this.activeIndex+')) .baron__scroller').scrollTop(0);
 
     // заменим метаданные (пока только title)
     metaDataChange();
@@ -75,53 +79,6 @@ $( document ).ready(function() {
     if(!pageNewBgColor) pageNewBgColor = '#fff';
     pageBgColorChange(pageNewBgColor);
 
-  });
-
-  // ВРЕМЕННО
-  $('.page__slide-part').each(function(){
-    $(this).find('h1').prepend('scroll: ' + Math.round($(this).position().top) + ' ');
-  });
-
-  // по скроллу в каждом конкретном слайде...
-  var t0;
-  $('.baron__scroller').each(function(){
-    var thisBlock = $(this);
-    thisBlock.on('scroll', function(){
-      clearTimeout(t0);
-      t0 = setTimeout(function () {
-          var innerBlocks = $(thisBlock).find('.page__slide-part');
-          var viewportTop = 0;
-          var viewportBottom = $('body').outerHeight();
-          // обойдем все вложенные части слайда
-          for (var i = 0; i < innerBlocks.length; i++) {
-            var innerBlockTop = $(innerBlocks[i]).offset().top;
-            var innerBlockBottom = $(innerBlocks[i]).offset().top + $(innerBlocks[i]).outerHeight();
-            // эта часть слайда не видна во вьюпорте
-            if(innerBlockBottom <= viewportTop || innerBlockTop >= viewportBottom){}
-            // эта часть слайда видна во вьюпорте
-            else {
-              var targetBlockIndex = 0;
-              // если низ первой видимой части выше середины вьюпорта
-              if(innerBlockBottom <= $('body').outerHeight() / 2) {
-                targetBlockIndex = i + 1;
-                // console.log('тянуть к блоку '+targetBlockIndex+' вниз');
-                var scrollTraget = Math.round($(innerBlocks[targetBlockIndex]).offset().top + $(thisBlock).scrollTop());
-                $(thisBlock).animate({scrollTop:scrollTraget}, 300);
-              }
-              // если низ первой видимой части ниже середины вьюпорта
-              else {
-                targetBlockIndex = i;
-                if($(innerBlocks[targetBlockIndex]).is('class'));
-                // console.log('тянуть к блоку '+targetBlockIndex+' вверх');
-                var scrollTraget = Math.round($(innerBlocks[targetBlockIndex]).offset().top + $(thisBlock).scrollTop());
-                $(thisBlock).animate({scrollTop:scrollTraget}, 300);
-              }
-              // выходим из цикла, нужен анализ лишь первой видимой части слайда
-              break;
-            }
-          }
-        }, 50);
-    });
   });
 
 
@@ -139,6 +96,19 @@ $( document ).ready(function() {
    */
   function pageBgColorChange(color) {
     $('body').css({backgroundColor: color});
+  }
+
+  // ref https://github.com/WICG/EventListenerOptions/pull/30
+  function isPassive() {
+    var supportsPassiveOption = false;
+    try {
+      addEventListener("test", null, Object.defineProperty({}, 'passive', {
+        get: function () {
+          supportsPassiveOption = true;
+        }
+      }));
+    } catch(e) {}
+    return supportsPassiveOption;
   }
 
 });

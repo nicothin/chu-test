@@ -1,7 +1,6 @@
 {
   "blocks": {
-    "page": [],
-    "baron": []
+    "page": []
   },
   "addCssBefore": [
     "./src/scss/functions.scss",
@@ -13,10 +12,8 @@
   "singleCompiled": [],
   "addJsBefore": [
     "./node_modules/jquery/dist/jquery.min.js",
-    "./node_modules/jquery-migrate/dist/jquery-migrate.min.js",
-    "./node_modules/object-fit-images/dist/ofi.min.js",
     "./node_modules/swiper/dist/js/swiper.min.js",
-    "./node_modules/baron/baron.min.js"
+    "./node_modules/iscroll/build/iscroll.js"
   ],
   "addJsAfter": [
     "./src/js/global-script.js"

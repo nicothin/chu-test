@@ -67,7 +67,6 @@ let postCssPlugins = [
   }),
   atImport(),
   inlineSVG(),
-  objectFitImages(),
   imageInliner({
     // Осторожнее с именами файлов картинок! Добавляйте имя блока как префикс к имени картинки.
     assetPaths: [
