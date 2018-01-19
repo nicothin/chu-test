@@ -1,27 +1,38 @@
 $( document ).ready(function() {
 
-  document.addEventListener('touchmove', function (e) { e.preventDefault(); }, isPassive() ? {
-    capture: false,
-    passive: false
-  } : false);
-
+  // будущий айСкролл
   var iScroll = {};
 
   // обойдем слайды и...
   $('.swiper-slide[id]').each(function() {
 
-    // определим ID
+    // определим ID слайда
     var id = $(this).attr('id');
 
+    // включим айСкролл
     iScroll[id] = new IScroll('#'+id, {
+      scrollX: false,
+      scrollX: true,
       scrollbars: true,
       mouseWheel: true,
       interactiveScrollbars: true,
-      shrinkScrollbars: 'scale',
-      snap: '.page__slide-part'
     });
 
-    // добавим data-hash атрибуты (для слайдера) на основе id слайда
+    // начнем следить за скроллом
+    iScroll[id].on('scrollEnd', function(){
+      var scrollY = this.y;
+      var scrollDirection = this.directionY;   console.log('direction: '+scrollDirection);
+      // iScroll[id].scrollToElement(document.querySelector('#'+id+' .page__slide-part:nth-child(2)'));
+      var viewportHeight = $('body').outerHeight();
+      $('#'+id+' .page__slide-part').each(function(){
+        var innerBlockTop = $(this).position().top; // console.log(innerBlockTop);
+        console.log('позиция верхней границы блока '+$(this).index()+' '+Math.round(innerBlockTop + scrollY));
+        if(Math.round(innerBlockTop + scrollY) <= (viewportHeight - viewportHeight / 3)) console.log('верхняя граница блок '+$(this).index()+' выше низа вьюпорта + 30% высоты');
+      });
+      console.log(' ');
+    });
+
+    // добавим data-hash атрибуты (для слайдера) на основе id слайда (нужны Swiper-у)
     $(this).attr('data-hash', id);
 
     // добавим фоновые цвета на слайды
