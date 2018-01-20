@@ -12,7 +12,7 @@ $( document ).ready(function() {
     // включим айСкролл
     iScroll[id] = new IScroll('#'+id, {
       scrollX: false,
-      scrollX: true,
+      scrollY: true,
       scrollbars: true,
       mouseWheel: true,
       interactiveScrollbars: true,
@@ -46,22 +46,24 @@ $( document ).ready(function() {
         }
         // если скроллим вверх
         else {
-          var thisBlockBottom = Math.round($(this).position().top + $(this).outerHeight() + scrollY);
-          var criticalLine = $('body').outerHeight() / 4;
-          console.log(thisBlockBottom+' - '+criticalLine);
-          // нижняя граница первого видимого блока ниже первой четверти высоты вьюпорта, но не ниже нижней границы вьюпорта?
-          // if((thisBlockBottom > criticalLine)) {
-          //   console.log('мотать к верху следующего');
-
-          // }
-          // else {
-          //   // console.log('мотать к низу текущего');
-          //   var targetPart = $(this).next().index() + 1;
-          //   iScroll[id].scrollToElement(document.querySelector('#'+id+' .page__slide-part:nth-child('+targetPart+')'), 800);
-          //   // var targetPosition = Math.round($(this).position().top + $(this).outerHeight() - $('body').outerHeight()) * -1;
-          //   // iScroll[id].scrollTo(0, targetPosition, 800);
-          // }
-          return false;
+          // этот блок виден на странице сейчас, следующий за ним блок существует и тоже виден? УПРТ.
+          if(checkShownSliderPart(this, scrollY) && $(this).next().length && checkShownSliderPart($(this).next(), scrollY)) {
+            var thisBlockBottom = Math.round($(this).position().top + $(this).outerHeight() + scrollY);
+            var criticalLine = $('body').outerHeight() / 4;
+            // нижняя граница первого видимого блока ниже первой четверти высоты вьюпорта, но не ниже нижней границы вьюпорта?
+            if((thisBlockBottom > criticalLine && thisBlockBottom < $('body').outerHeight())) {
+              // мотаем так, чтобы низ первого из видимых совпал с низом вьюпорта
+              var targetPosition = Math.round($(this).position().top + $(this).outerHeight() - $('body').outerHeight()) * -1;
+              iScroll[id].scrollTo(0, targetPosition, 800);
+            }
+            // нижняя граница первого видимого блока ниже верхней границы вьюпорта, но не ниже первой четверти высоты вьюпорта?
+            else if(thisBlockBottom > 0 && thisBlockBottom < ($('body').outerHeight() / 4)) {
+              // мотаем к верхней границе следующего
+              var targetPart = $(this).next().index() + 1;
+              iScroll[id].scrollToElement(document.querySelector('#'+id+' .page__slide-part:nth-child('+targetPart+')'), 800);
+            }
+            return false;
+          }
         }
       });
     });
@@ -164,16 +166,20 @@ $( document ).ready(function() {
   }
 
   // ref https://github.com/WICG/EventListenerOptions/pull/30
-  // function isPassive() {
-  //   var supportsPassiveOption = false;
-  //   try {
-  //     addEventListener("test", null, Object.defineProperty({}, 'passive', {
-  //       get: function () {
-  //         supportsPassiveOption = true;
-  //       }
-  //     }));
-  //   } catch(e) {}
-  //   return supportsPassiveOption;
-  // }
+  function isPassive() {
+    var supportsPassiveOption = false;
+    try {
+      addEventListener("test", null, Object.defineProperty({}, 'passive', {
+        get: function () {
+          supportsPassiveOption = true;
+        }
+      }));
+    } catch(e) {}
+    return supportsPassiveOption;
+  }
 
+  document.addEventListener('touchmove', function (e) { e.preventDefault(); }, isPassive() ? {
+    capture: false,
+    passive: false
+  } : false);
 });
