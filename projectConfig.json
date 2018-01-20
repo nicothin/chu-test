@@ -13,7 +13,8 @@
   "addJsBefore": [
     "./node_modules/jquery/dist/jquery.min.js",
     "./node_modules/swiper/dist/js/swiper.min.js",
-    "./node_modules/iscroll/build/iscroll.js"
+    "./node_modules/iscroll/build/iscroll.js",
+    "./node_modules/ismobilejs/isMobile.min.js"
   ],
   "addJsAfter": [
     "./src/js/global-script.js"

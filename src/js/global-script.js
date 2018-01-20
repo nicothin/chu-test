@@ -1,5 +1,19 @@
 $( document ).ready(function() {
 
+  if (window.isMobile !== undefined) {
+    // console.log(isMobile);
+    if(isMobile.any) {
+      $(window).on('resize', function(){
+        // посчитаем реальное значение высоты вьюпорта и покостылим :(
+        var real100vh = window.innerHeight;
+        console.log(real100vh);
+        $('.page__slide-part').css({'min-height': real100vh});
+        $('.page__slide-part--full-page-only, .swiper-slide, .swiper-container-coverflow').css({'height': real100vh});
+      });
+      $(window).trigger('resize');
+    }
+  }
+
   // будущий айСкролл
   var iScroll = {};
 
@@ -29,7 +43,7 @@ $( document ).ready(function() {
           // этот блок виден на странице сейчас, следующий за ним блок существует и тоже виден? УПРТ.
           if(checkShownSliderPart(this, scrollY) && $(this).next().length && checkShownSliderPart($(this).next(), scrollY)) {
             var nextBlockTop = Math.round($(this).next().position().top + scrollY);
-            var criticalLine = $('body').outerHeight() - $('body').outerHeight() / 4;
+            var criticalLine = window.innerHeight - window.innerHeight / 4;
             // верх следующего блока уже выше нижней четверти высоты вьюпорта?
             if(nextBlockTop < criticalLine) {
               // мотаем к следующему
@@ -38,7 +52,7 @@ $( document ).ready(function() {
             }
             else {
               // мотаем так, чтобы низ первого из видимых совпал с низом вьюпорта
-              var targetPosition = Math.round($(this).position().top + $(this).outerHeight() - $('body').outerHeight()) * -1;
+              var targetPosition = Math.round($(this).position().top + $(this).outerHeight() - window.innerHeight) * -1;
               iScroll[id].scrollTo(0, targetPosition, 800);
             }
             return false;
@@ -49,15 +63,15 @@ $( document ).ready(function() {
           // этот блок виден на странице сейчас, следующий за ним блок существует и тоже виден? УПРТ.
           if(checkShownSliderPart(this, scrollY) && $(this).next().length && checkShownSliderPart($(this).next(), scrollY)) {
             var thisBlockBottom = Math.round($(this).position().top + $(this).outerHeight() + scrollY);
-            var criticalLine = $('body').outerHeight() / 4;
+            var criticalLine = window.innerHeight / 4;
             // нижняя граница первого видимого блока ниже первой четверти высоты вьюпорта, но не ниже нижней границы вьюпорта?
-            if((thisBlockBottom > criticalLine && thisBlockBottom < $('body').outerHeight())) {
+            if((thisBlockBottom > criticalLine && thisBlockBottom < window.innerHeight)) {
               // мотаем так, чтобы низ первого из видимых совпал с низом вьюпорта
-              var targetPosition = Math.round($(this).position().top + $(this).outerHeight() - $('body').outerHeight()) * -1;
+              var targetPosition = Math.round($(this).position().top + $(this).outerHeight() - window.innerHeight) * -1;
               iScroll[id].scrollTo(0, targetPosition, 800);
             }
             // нижняя граница первого видимого блока ниже верхней границы вьюпорта, но не ниже первой четверти высоты вьюпорта?
-            else if(thisBlockBottom > 0 && thisBlockBottom < ($('body').outerHeight() / 4)) {
+            else if(thisBlockBottom > 0 && thisBlockBottom < (window.innerHeight / 4)) {
               // мотаем к верхней границе следующего
               var targetPart = $(this).next().index() + 1;
               iScroll[id].scrollToElement(document.querySelector('#'+id+' .page__slide-part:nth-child('+targetPart+')'), 800);
@@ -76,6 +90,18 @@ $( document ).ready(function() {
     if(slideBgColor) $(this).css({backgroundColor: slideBgColor});
 
   });
+
+  // нужно подновить скролл на мобилках по ресайзу (повороту)
+  if (window.isMobile !== undefined) {
+    if(isMobile.any) {
+      $(window).on('resize', function(){
+        $('.swiper-slide[id]').each(function() {
+          var id = $(this).attr('id');
+          iScroll[id].refresh().dispatchEvent('scrollEnd');
+        });
+      });
+    }
+  }
 
   // включаем главную карусель
   var pageSwiper = new Swiper('#page-slider', {
@@ -154,7 +180,7 @@ $( document ).ready(function() {
   function checkShownSliderPart(block, scroll) {
     var innerBlockTop = Math.round($(block).position().top);
     var innerBlockBottom = Math.round($(block).position().top + $(block).outerHeight());
-    var viewportHeight = $('body').outerHeight();
+    var viewportHeight = window.innerHeight;
     if(
       (innerBlockTop + scroll) <= viewportHeight // верхняя граница блока выше низа вьюпорта
       &&
